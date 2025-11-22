@@ -30,6 +30,7 @@ def hello_world():
 if __name__ == '__main__':
     # Importe os modelos aqui para garantir que o db.create_all() os encontre
     from models.user import User
-    from models.registro import Transaction
+    # Mudança aqui:
+    from models.task import Task
     
     app.run(debug=True)
