@@ -61,15 +61,7 @@ def list_tasks():
     # Serializa os objetos POO em JSON
     output = []
     for task in tasks:
-        output.append({
-            'id': task.id,
-            'title': task.title,
-            'description': task.description,
-            'status': task.status,
-            'due_date': task.due_date.isoformat(), # Converte data para string no formato ISO
-            'user_id': task.user_id
-        })
-        
+        output.append(task.to_dict())
     return jsonify(output), 200
 
 
@@ -86,14 +78,8 @@ def get_task(task_id):
         # Se não encontrou ou a tarefa existe, mas pertence a outro usuário
         return jsonify({"msg": "Tarefa não encontrada ou acesso negado"}), 404
 
-    return jsonify({
-        'id': task.id,
-        'title': task.title,
-        'description': task.description,
-        'status': task.status,
-        'due_date': task.due_date.isoformat(),
-        'user_id': task.user_id
-    }), 200
+    return jsonify(task.to_dict()), 200
+    
 
 # --- 4. UPDATE: Atualização de uma Tarefa (PUT /api/tasks/<int:id>) ---
 @tasks_bp.route('/<int:task_id>', methods=['PUT'])
