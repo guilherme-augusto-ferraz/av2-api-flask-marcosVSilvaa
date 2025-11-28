@@ -3,6 +3,7 @@ from flask import Blueprint, request, jsonify
 from models.user import User # Importa o modelo POO de usuário
 from database import db
 from flask_jwt_extended import create_access_token # Função para criar o token
+from sqlalchemy.exc import IntegrityError
 
 # Cria o Blueprint para agrupar as rotas
 users_bp = Blueprint('users', __name__)
@@ -29,14 +30,21 @@ def register():
     # Usa o método da classe User (POO) para criptografar e salvar a senha
     new_user.set_password(password) 
 
-    try:
+try:
         db.session.add(new_user)
         db.session.commit()
-        # Retorna o status 201 Created (Criado)
-        return jsonify({"msg": "Usuário registrado com sucesso!", "user_id": new_user.id}), 201 
+        # Linha 36 CORRIGIDA: Usa to_dict()
+        return jsonify({"msg": "Usuário registrado com sucesso!", "user": new_user.to_dict()}), 201 
+    
+    # Adicionar o bloco IntegrityError aqui:
+    except IntegrityError: 
+        db.session.rollback()
+        return jsonify({"msg": "Nome de usuário ou email já registrado"}), 409
+        
+    # Seu bloco original, que agora se torna a captura genérica (Linha 37)
     except Exception as e:
         db.session.rollback()
-        return jsonify({"msg": "Erro ao registrar usuário", "error": str(e)}), 500
+        return jsonify({"msg": "Erro interno ao registrar usuário", "error": str(e)}), 500
 
 
 # --- Rota 2: Login (Autenticação e Geração de JWT) ---
