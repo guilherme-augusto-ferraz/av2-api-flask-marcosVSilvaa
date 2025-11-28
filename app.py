@@ -7,6 +7,7 @@ import os
 
 # Importa o modelo User (Necessário para a correção do JWT)
 from models.user import User 
+from models.task import Task
 
 # 1. Carrega as variáveis de ambiente (.env)
 load_dotenv()
@@ -18,15 +19,10 @@ app = Flask(__name__)
 # =================================================================
 # CORREÇÃO PARA O CODESPACE: Garante que a chave SECRET_KEY exista
 # =================================================================
-secret_key_from_env = os.getenv("JWT_SECRET_KEY")
-
-if secret_key_from_env:
-    # Se o .env funcionou, usamos a chave dele
-    app.config["JWT_SECRET_KEY"] = secret_key_from_env
-else:
-    # Se o .env falhou, usamos uma chave de fallback (PARA TESTE)
-    # IMPORTANTE: Em produção, o ideal é que a chave seja lida do ambiente.
-    app.config["JWT_SECRET_KEY"] = "CHAVE_SECRETA_DE_BACKUP_PARA_CODESPACE_2025"
+app.config["JWT_SECRET_KEY"] = os.getenv(
+    "JWT_SECRET_KEY", 
+    "CHAVE_SECRETA_DE_BACKUP_PARA_CODESPACE_2025"
+)
 
 jwt = JWTManager(app)
 
@@ -71,9 +67,6 @@ def hello_world():
     return 'API de Lista de Tarefas está online!'
 
 if __name__ == '__main__':
-    # Importa os modelos para que o SQLAlchemy saiba quais tabelas criar
-    from models.user import User
-    from models.task import Task 
     
     # Cria as tabelas no BD (users e tasks), se não existirem
     with app.app_context():
