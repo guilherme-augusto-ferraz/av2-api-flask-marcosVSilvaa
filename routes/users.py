@@ -55,7 +55,7 @@ def login():
         # 3. Geração do Token JWT (JSON Web Token)
         # identity=user.id armazena o ID do usuário DENTRO do token para ser usado
         # para identificar o usuário em rotas protegidas (Etapa 4).
-        access_token = create_access_token(identity=user.id)
+        access_token = create_access_token(identity=user)
         
         return jsonify({
             "msg": "Login bem-sucedido",

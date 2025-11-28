@@ -5,7 +5,7 @@ from flask_jwt_extended import JWTManager
 from dotenv import load_dotenv
 import os
 
-# Importe o modelo User - Necessário para a correção do JWT
+# Importa o modelo User (Necessário para a correção do JWT)
 from models.user import User 
 
 # 1. Carrega as variáveis de ambiente (.env)
@@ -25,12 +25,13 @@ jwt = JWTManager(app)
 # 1. Define qual valor será armazenado no token (o ID do usuário)
 @jwt.user_identity_loader
 def user_identity_lookup(user):
+    # 'user' aqui é o objeto User completo passado pelo routes/users.py
     return user.id
 
 # 2. Define como encontrar o usuário no banco de dados a partir do ID do token
 @jwt.user_lookup_loader
 def user_lookup_callback(_jwt_header, jwt_data):
-    # 'sub' é onde o ID (subject) fica no token
+    # 'sub' (subject) é o campo padrão onde o ID fica no token
     identity = jwt_data["sub"] 
     # Usa o ID para buscar o usuário no DB
     return User.query.filter_by(id=identity).one_or_none()
@@ -42,13 +43,13 @@ def user_lookup_callback(_jwt_header, jwt_data):
 # 3. Configuração e Inicialização do Banco de Dados
 configure_database(app)
 
-# 4. Importação e Registro das Rotas (Etapas 3 e 4)
+# 4. Importação e Registro das Rotas (Blueprints)
 from routes.users import users_bp
 from routes.tasks import tasks_bp 
 
 # REGISTRO FINAL DOS BLUEPRINTS:
-app.register_blueprint(users_bp, url_prefix='/api/users')
-app.register_blueprint(tasks_bp, url_prefix='/api/tasks') 
+app.register_blueprint(users_bp, url_prefix='/api/users') # Rotas de Cadastro e Login
+app.register_blueprint(tasks_bp, url_prefix='/api/tasks') # Rotas de CRUD de Tarefas
 
 @app.route('/')
 def hello_world():
