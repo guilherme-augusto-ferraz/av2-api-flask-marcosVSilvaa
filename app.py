@@ -5,20 +5,24 @@ from flask_jwt_extended import JWTManager
 from dotenv import load_dotenv
 import os
 
-# Importe o modelo User
-from models.user import User # <--- Adicione aqui
+# Importe o modelo User - Necessário para a correção do JWT
+from models.user import User 
 
-# ... (restante do código: load_dotenv() e app = Flask(__name__))
+# 1. Carrega as variáveis de ambiente (.env)
+load_dotenv()
+
+# Inicialização da Aplicação
+app = Flask(__name__)
 
 # 2. Configuração do JWT
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 jwt = JWTManager(app)
 
 # =================================================================
-# CORREÇÃO CRÍTICA: Configura o JWT para usar o ID do usuário (int)
+# CORREÇÃO CRÍTICA: Configuração do JWT para lidar com IDs inteiros
 # =================================================================
 
-# 1. Define qual valor será armazenado no token (o ID do usuário, que é um inteiro)
+# 1. Define qual valor será armazenado no token (o ID do usuário)
 @jwt.user_identity_loader
 def user_identity_lookup(user):
     return user.id
@@ -26,7 +30,9 @@ def user_identity_lookup(user):
 # 2. Define como encontrar o usuário no banco de dados a partir do ID do token
 @jwt.user_lookup_loader
 def user_lookup_callback(_jwt_header, jwt_data):
-    identity = jwt_data["sub"] # 'sub' é onde o ID (subject) fica no token
+    # 'sub' é onde o ID (subject) fica no token
+    identity = jwt_data["sub"] 
+    # Usa o ID para buscar o usuário no DB
     return User.query.filter_by(id=identity).one_or_none()
 
 # =================================================================
@@ -40,7 +46,7 @@ configure_database(app)
 from routes.users import users_bp
 from routes.tasks import tasks_bp 
 
-# REGISTRO CORRIGIDO E SIMPLIFICADO:
+# REGISTRO FINAL DOS BLUEPRINTS:
 app.register_blueprint(users_bp, url_prefix='/api/users')
 app.register_blueprint(tasks_bp, url_prefix='/api/tasks') 
 
