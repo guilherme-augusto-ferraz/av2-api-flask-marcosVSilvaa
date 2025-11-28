@@ -1,6 +1,6 @@
 # app.py
 from flask import Flask
-from database import configure_database, db # Importa db
+from database import configure_database, db 
 from flask_jwt_extended import JWTManager
 from dotenv import load_dotenv
 import os
@@ -19,13 +19,12 @@ jwt = JWTManager(app)
 configure_database(app)
 
 # 4. Importação e Registro das Rotas (Etapas 3 e 4)
-# Importa o Blueprint das rotas de usuário
-from routes.users import users_bp 
-# from routes.tasks import tasks_bp # Será usado na Etapa 4
+from routes.users import users_bp
+from routes.tasks import tasks_bp 
 
-# Registra o Blueprint das rotas de usuário.
+# REGISTRO CORRIGIDO E SIMPLIFICADO:
 app.register_blueprint(users_bp, url_prefix='/api/users')
-# app.register_blueprint(tasks_bp, url_prefix='/api/tasks') # Será usado na Etapa 4
+app.register_blueprint(tasks_bp, url_prefix='/api/tasks') 
 
 @app.route('/')
 def hello_world():
