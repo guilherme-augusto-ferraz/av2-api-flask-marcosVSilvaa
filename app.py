@@ -15,30 +15,45 @@ load_dotenv()
 app = Flask(__name__)
 
 # 2. Configuração do JWT
-app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
+# =================================================================
+# CORREÇÃO PARA O CODESPACE: Garante que a chave SECRET_KEY exista
+# =================================================================
+secret_key_from_env = os.getenv("JWT_SECRET_KEY")
+
+if secret_key_from_env:
+    # Se o .env funcionou, usamos a chave dele
+    app.config["JWT_SECRET_KEY"] = secret_key_from_env
+else:
+    # Se o .env falhou, usamos uma chave de fallback (PARA TESTE)
+    # IMPORTANTE: Em produção, o ideal é que a chave seja lida do ambiente.
+    app.config["JWT_SECRET_KEY"] = "CHAVE_SECRETA_DE_BACKUP_PARA_CODESPACE_2025"
+
 jwt = JWTManager(app)
 
 # =================================================================
-# CORREÇÃO CRÍTICA: Configuração do JWT para lidar com IDs inteiros
+# FIM DA CORREÇÃO DE CHAVE
+# =================================================================
+
+
+# =================================================================
+# CONFIGURAÇÃO DO JWT PARA LIDAR COM IDs INTEIROS (INT)
 # =================================================================
 
 # 1. Define qual valor será armazenado no token (o ID do usuário)
 @jwt.user_identity_loader
 def user_identity_lookup(user):
-    # 'user' aqui é o objeto User completo passado pelo routes/users.py
     return user.id
 
 # 2. Define como encontrar o usuário no banco de dados a partir do ID do token
 @jwt.user_lookup_loader
 def user_lookup_callback(_jwt_header, jwt_data):
-    # 'sub' (subject) é o campo padrão onde o ID fica no token
     identity = jwt_data["sub"] 
-    # Usa o ID para buscar o usuário no DB
     return User.query.filter_by(id=identity).one_or_none()
 
 # =================================================================
-# FIM DA CORREÇÃO
+# FIM DA CORREÇÃO DE IDENTIDADE
 # =================================================================
+
 
 # 3. Configuração e Inicialização do Banco de Dados
 configure_database(app)
